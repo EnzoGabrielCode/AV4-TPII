@@ -1,11 +1,339 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Atlantis — Sistema de Gestão Hoteleira</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-wave">A</div>
+      <span class="brand-name">Atlantis</span>
+    </div>
+    <div class="brand-tagline">Gestão hoteleira</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Painel</div>
+    <a class="nav-item active" onclick="showPage('dashboard')">Dashboard</a>
+
+    <div class="nav-section-label">Hóspedes</div>
+    <a class="nav-item" onclick="showPage('clientes')">Hóspedes</a>
+
+    <div class="nav-section-label">Acomodações</div>
+    <a class="nav-item" onclick="showPage('acomodacoes')">Acomodações</a>
+
+    <div class="nav-section-label">Hospedagens</div>
+    <a class="nav-item" onclick="showPage('hospedagens')">Hospedagens</a>
+    <a class="nav-item" onclick="showPage('checkout')">Check-out</a>
+  </nav>
+
+  <div class="sidebar-footer">v1.0 · Atlantis SPA</div>
+</aside>
+
+<main class="main">
+
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="page-title" id="topbar-title">Dashboard</span>
+    </div>
+    <div class="topbar-actions">
+      <div class="avatar" title="Administrador">AD</div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👤</div>
+          <div class="stat-value" id="stat-clientes">0</div>
+          <div class="stat-label">Hóspedes cadastrados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">🏨</div>
+          <div class="stat-value">6</div>
+          <div class="stat-label">Tipos de acomodação</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">📋</div>
+          <div class="stat-value" id="stat-ativas">0</div>
+          <div class="stat-label">Hospedagens ativas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">✓</div>
+          <div class="stat-value" id="stat-checkout">0</div>
+          <div class="stat-label">Check-outs realizados</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <div class="card-header">
+            <span class="section-title">Últimas hospedagens</span>
+            <button class="btn btn-outline btn-sm" onclick="showPage('hospedagens')">Ver todas</button>
+          </div>
+          <div id="dash-hospedagens" style="padding:0 0 4px">
+            <div class="empty-state">
+              <div class="empty-state-icon">📋</div>
+              <p>Nenhuma hospedagem registrada</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="section-title">Atividade recente</span>
+          </div>
+          <div id="dash-activity" style="padding:8px 20px 12px">
+            <div class="empty-state">
+              <div class="empty-state-icon">🕐</div>
+              <p>Nenhuma atividade registrada</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-clientes">
+      <div class="section-header">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="search-bar">
+            <span class="search-bar-icon">🔍</span>
+            <input type="text" placeholder="Buscar hóspede..." id="search-clientes" oninput="renderClientes()">
+          </div>
+          <div class="tabs" style="margin-bottom:0">
+            <div class="tab active"  onclick="filterCliente('todos',this)">Todos</div>
+            <div class="tab"         onclick="filterCliente('titular',this)">Titular</div>
+            <div class="tab"         onclick="filterCliente('dependente',this)">Dependente</div>
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="openModalCliente()">+ Novo hóspede</button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Nome social</th>
+                <th>Nascimento</th>
+                <th>Cadastro</th>
+                <th>Tipo</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-clientes">
+              <tr><td colspan="6">
+                <div class="empty-state">
+                  <div class="empty-state-icon">👤</div>
+                  <p>Nenhum hóspede cadastrado</p>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-acomodacoes">
+      <div class="section-header">
+        <span></span>
+        <button class="btn btn-outline btn-sm" onclick="showToast('Acomodações pré-cadastradas no sistema.')">ℹ Sobre as acomodações</button>
+      </div>
+      <div class="rooms-grid" id="rooms-grid"></div>
+    </div>
+
+    <div class="page" id="page-hospedagens">
+      <div class="section-header">
+        <div class="tabs" style="margin-bottom:0">
+          <div class="tab active"  onclick="filterHosp('todas',this)">Todas</div>
+          <div class="tab"         onclick="filterHosp('ativas',this)">Ativas</div>
+          <div class="tab"         onclick="filterHosp('encerradas',this)">Encerradas</div>
+        </div>
+        <button class="btn btn-gold" onclick="openModalHospedagem()">+ Registrar hospedagem</button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Hóspede</th>
+                <th>Acomodação</th>
+                <th>Entrada</th>
+                <th>Saída</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-hospedagens">
+              <tr><td colspan="6">
+                <div class="empty-state">
+                  <div class="empty-state-icon">📋</div>
+                  <p>Nenhuma hospedagem registrada</p>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-checkout">
+      <div class="section-header">
+        <p style="color:var(--text-muted);font-size:13.5px">Selecione uma hospedagem ativa para realizar o check-out.</p>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Hóspede</th>
+                <th>Acomodação</th>
+                <th>Entrada</th>
+                <th>Dias</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-checkout">
+              <tr><td colspan="5">
+                <div class="empty-state">
+                  <div class="empty-state-icon">✓</div>
+                  <p>Nenhuma hospedagem ativa para check-out</p>
+                </div>
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Modals -->
+<div class="modal-backdrop" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Hóspede</span>
+      <button class="modal-close" onclick="closeModal('modal-cliente')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group"><label>Nome completo</label><input type="text" id="c-nome" placeholder="Ex: Maria da Silva"></div>
+        <div class="form-group"><label>Nome social</label><input type="text" id="c-nomesocial" placeholder="Como prefere ser chamado(a)"></div>
+        <div class="form-group"><label>Data de nascimento</label><input type="date" id="c-nascimento"></div>
+        <div class="form-group"><label>Tipo</label><select id="c-tipo"><option value="titular">Titular</option><option value="dependente">Dependente</option></select></div>
+        <div class="form-group"><label>CPF</label><input type="text" id="c-cpf" placeholder="000.000.000-00"></div>
+        <div class="form-group"><label>RG</label><input type="text" id="c-rg" placeholder="00.000.000-0"></div>
+        <div class="form-group"><label>Telefone</label><input type="tel" id="c-telefone" placeholder="(11) 99999-9999"></div>
+        <div class="form-group"><label>E-mail</label><input type="email" id="c-email" placeholder="email@exemplo.com"></div>
+        <div class="form-group full"><label>Endereço</label><input type="text" id="c-endereco" placeholder="Rua, número, bairro, cidade — UF"></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-cliente')">Cancelar</button>
+        <button class="btn btn-gold"    onclick="salvarCliente()">Salvar hóspede</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-editar-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Editar Hóspede</span>
+      <button class="modal-close" onclick="closeModal('modal-editar-cliente')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-idx">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group"><label>Nome completo</label><input type="text" id="edit-nome"></div>
+        <div class="form-group"><label>Nome social</label><input type="text" id="edit-nomesocial"></div>
+        <div class="form-group"><label>Data de nascimento</label><input type="date" id="edit-nascimento"></div>
+        <div class="form-group"><label>Tipo</label><select id="edit-tipo"><option value="titular">Titular</option><option value="dependente">Dependente</option></select></div>
+        <div class="form-group"><label>CPF</label><input type="text" id="edit-cpf"></div>
+        <div class="form-group"><label>Telefone</label><input type="tel" id="edit-telefone"></div>
+        <div class="form-group full"><label>Endereço</label><input type="text" id="edit-endereco"></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-editar-cliente')">Cancelar</button>
+        <button class="btn btn-gold"    onclick="atualizarCliente()">Salvar alterações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-excluir">
+  <div class="modal" style="width:400px">
+    <div class="modal-header">
+      <span class="modal-title">Confirmar exclusão</span>
+      <button class="modal-close" onclick="closeModal('modal-excluir')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-msg">Tem certeza que deseja excluir o hóspede <strong id="excluir-nome"></strong>? Esta ação não poderá ser desfeita.</p>
+      <div class="form-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-excluir')">Cancelar</button>
+        <button class="btn btn-danger"  onclick="confirmarExclusao()">Excluir hóspede</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-hospedagem">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Registrar Hospedagem</span>
+      <button class="modal-close" onclick="closeModal('modal-hospedagem')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="margin-bottom:16px">
+        <div class="form-group"><label>Hóspede (titular)</label><select id="h-cliente"></select></div>
+        <div class="form-group"><label>Acomodação</label><select id="h-acomodacao"></select></div>
+        <div class="form-group"><label>Data de entrada</label><input type="date" id="h-entrada"></div>
+        <div class="form-group"><label>Previsão de saída</label><input type="date" id="h-saida-prev"></div>
+      </div>
+      <div class="form-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-hospedagem')">Cancelar</button>
+        <button class="btn btn-gold"    onclick="registrarHospedagem()">Registrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-checkout">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">
+      <span class="modal-title">Confirmar Check-out</span>
+      <button class="modal-close" onclick="closeModal('modal-checkout')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="confirm-msg">
+        Deseja realizar o check-out de <strong id="co-nome"></strong>
+        da acomodação <strong id="co-acom"></strong>?
+      </p>
+      <input type="hidden" id="co-idx">
+      <div class="form-footer">
+        <button class="btn btn-outline" onclick="closeModal('modal-checkout')">Cancelar</button>
+        <button class="btn btn-primary" onclick="confirmarCheckout()">Confirmar check-out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✓</span>
+  <span id="toast-msg">Operação realizada com sucesso!</span>
+</div>
+
+<script type="module" src="/src/main.ts"></script>
 </body>
 </html>
